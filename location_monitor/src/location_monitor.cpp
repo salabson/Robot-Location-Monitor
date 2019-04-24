@@ -1,6 +1,16 @@
+#include<string>
 #include "ros/ros.h"
 #include "nav_msgs/Odometry.h"
 
+using namespace std;
+
+class Landmark{
+public:
+  Landmark():name(name), x(x), y() {}
+  string name;
+  float x;
+  float y;
+};
 
 class LocationMonitor{
 
