@@ -19,7 +19,7 @@ public:
 class LocationMonitor{
 
 public:
- LocationMonitor(): landmarks_(){
+ LocationMonitor(const ros::Publisher& landmark_pub ): landmarks_(), landmark_pub(landmark_pub){
   InitLandmarks();
 }
 
@@ -27,7 +27,10 @@ void OdomCallback(const nav_msgs::Odometry::ConstPtr& msg){
 double  x = msg->pose.pose.position.x;                                    
 double  y = msg->pose.pose.position.y;                                                                             
 LandmarkDistance dist = FindClosest(x,y);
-ROS_INFO("name: %s distance: %f",dist.name.c_str(),dist.distance);                                            
+landmark_pub.publish(dist);                                            
+if (dist.distance < 0.5){
+ROS_INFO("I am near %s",dist.name.c_str());
+}
 }   
 
 LandmarkDistance FindClosest(double x, double y){
@@ -47,6 +50,7 @@ return result;
 
 private:
   vector<Landmark> landmarks_;
+  ros::Publisher landmark_pub;
 void InitLandmarks()
 {
   landmarks_.push_back(Landmark("cube",0.31,-0.99));
@@ -63,10 +67,12 @@ int main(int argc, char **argv){
 ros::init(argc, argv, "location_monitor");
 ros::NodeHandle nh;
 
-// creat subscriber
-LocationMonitor monitor;
-ros::Subscriber location_sub = nh.subscribe("odom",10, &LocationMonitor::OdomCallback, &monitor);
+// Creat publisher
+ros::Publisher land_mark_pub = nh.advertise<LandmarkDistance>("closest_landmark",10);
+LocationMonitor monitor(land_mark_pub);
 
+// creat subscriber
+ros::Subscriber location_sub = nh.subscribe("odom",10, &LocationMonitor::OdomCallback, &monitor);
 // continue checking for call back
 ros::spin();
 return 0;
