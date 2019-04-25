@@ -25,8 +25,9 @@ public:
 
 void OdomCallback(const nav_msgs::Odometry::ConstPtr& msg){             
 double  x = msg->pose.pose.position.x;                                    
-double  y = msg->pose.pose.position.y;                                    
-ROS_INFO("X: %f y: %f",x,y);                                            
+double  y = msg->pose.pose.position.y;                                                                             
+LandmarkDistance dist = FindClosest(x,y);
+ROS_INFO("name: %s distance: %f",dist.name.c_str(),dist.distance);                                            
 }   
 
 LandmarkDistance FindClosest(double x, double y){
